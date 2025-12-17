@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Videos (ignore all videos)
+*.mp4
+*.MP4
+*.mov
+videos/
+person_v11s/
+
+# Model weights (recommended to ignore)
+*.pt
+*.zip
+
+# Runtime outputs
+fall_snapshots/
+runs/
+

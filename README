@@ -1,0 +1,120 @@
+## 1. `process_camera.py`
+
+### Purpose
+
+This is the **main entry point** of the application. It orchestrates the entire video-processing pipeline: loading configuration, reading video streams, running detection logic, tracking people across frames, and triggering fall events.
+
+### Key Responsibilities
+
+* Loads configuration values (model path, thresholds, ropes, input video, output paths).
+* Initializes the YOLO pose model **once** for performance efficiency.
+* Reads video frames using OpenCV.
+* Invokes pose detection for each frame.
+* Maintains lightweight tracking of people across frames (typically using IoU-based matching).
+* Applies fall detection logic based on rope position and body keypoints.
+* Draws visual overlays (bounding boxes, ropes, alerts).
+* Saves fall snapshots and logs events (CSV/images).
+
+### Important Details
+
+* Designed to be **configuration-driven**; thresholds and paths should not be hardcoded.
+* Acts as the integration layer between all helper modules.
+* Any future model integration (e.g., people-only detector + pose detector) should be coordinated here.
+
+---
+
+## 2. `pose_detector.py`
+
+### Purpose
+
+Encapsulates **human detection and pose estimation** logic using YOLOv8.
+
+### Key Responsibilities
+
+* Loads the YOLOv8 pose model.
+* Runs inference on frames.
+* Extracts bounding boxes, keypoints, and confidence scores.
+* Filters detections based on confidence and keypoint visibility.
+
+### Important Details
+
+* Centralizes all pose-related logic to keep the main pipeline clean.
+* Keypoint indices (hips, ankles, shoulders, etc.) are critical for fall logic accuracy.
+* Can be extended to support multiple models (e.g., person detector + pose estimator).
+
+---
+
+## 3. `rope_utils.py`
+
+### Purpose
+
+Provides **geometric utilities** for working with ropes (virtual reference lines) used to determine whether a person is above or below a rope.
+
+### Key Responsibilities
+
+* Load rope definitions for a given camera.
+* Interpolate rope position (Y-value) for any X-coordinate.
+* Assign a person to the nearest valid rope based on ankle or reference points.
+
+### Important Details
+
+* Rope interpolation allows non-straight, curved, or slanted ropes.
+* Ensures consistent rope comparison across different camera perspectives.
+* Critical for avoiding false fall detections from ground-level people.
+
+---
+
+## 4. `rope_drawer.py`
+
+### Purpose
+
+Handles **visualization and camera identification** related to ropes.
+
+### Key Responsibilities
+
+* Extract camera ID from video filenames or paths.
+* Draw rope lines/curves onto video frames for visualization.
+* Use mouse to draw the points 
+* Convert stored rope points into drawable OpenCV primitives.
+* n to draw new rope, r to reset drawings , s to save all drawings
+### Important Details
+
+* change the file name in the last of the file
+* Purely a helper/visual module; does not affect detection logic.
+
+
+---
+
+## 5. `config.json`
+
+### Purpose
+
+Acts as the **central configuration file** for the entire system. 
+All tweaks,changes should be made here
+
+### Key Responsibilities
+
+* Defines model paths and inference thresholds.
+* Specifies input video paths.
+* Stores per-camera rope coordinates.
+* Configures output locations (snapshots, CSV logs).
+
+### Important Details
+
+* Supports **multiple cameras**, each with one or more ropes.
+* Any tuning (confidence thresholds, IoU thresholds, confirmation frames) should be done here.
+* Enables easy deployment without modifying source code.
+
+---
+
+## Overall Architecture Summary
+
+* The system follows a **modular design**: detection, geometry, visualization, and orchestration are cleanly separated.
+* `process_camera.py` acts as the controller.
+* Pose estimation drives fall logic, while ropes provide contextual grounding.
+* Configuration-first design improves maintainability and scalability.
+
+---
+---
+
+End of documentation.
