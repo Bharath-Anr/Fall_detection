@@ -1,3 +1,6 @@
+Flow:
+config.json-->rope_drawer-->rope_utils-->pose_detector-->fall_logic-->process_camera
+
 ## 1. `process_camera.py`
 
 ### Purpose
